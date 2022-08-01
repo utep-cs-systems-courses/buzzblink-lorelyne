@@ -4,6 +4,7 @@
 static char count;
 void countToThree();
 void imperialSound();
+void dimLights();
 void rest();
 
 #endif

@@ -5,6 +5,7 @@
 
 static char count = 0;
 
+/*as button is pressed, we increment to 3 starting from 0*/
 void countToThree(){
 
   switch(count){
@@ -113,6 +114,34 @@ void imperialSound(){
   led_update();
 }
 
+/*dims lights to 75%, as we call dimLights() really fast through the wdInterrupt one state
+will be off as to achieve the desired effect of 75%*/
+void dimLights()
+{
+  static char state = 0;
+  switch(state){
+  case 0:
+    red_on = 1;
+    green_on = 1;
+    state = 1;
+    break;
+  case 1:
+    red_on = 1;
+    green_on = 1;
+    state = 2;
+    break;
+  case 2:
+    red_on = 1;
+    green_on = 1;
+    state = 3;
+    break;
+  case 3:
+    red_on = 0; /*lights are both off for one state*/
+    green_on = 0;
+    state = 0;
+    break;
+  }
+}
 void rest(){
   buzzer_set_period(0);
   count = 0;

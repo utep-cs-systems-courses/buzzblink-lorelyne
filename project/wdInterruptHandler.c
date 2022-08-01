@@ -14,5 +14,12 @@ void __interrupt_vec(WDT_VECTOR) WDT(){
       buzzCount=0;
     }else if(musicSwi == 2){
       buzzer_set_period(0);
-    }
+   }else if(bttnState == 2)
+     {
+      if(++blink_count != 187){ /*187 is 75% of 250*/
+	dimLights();
+      }else{
+	blink_count = 0;
+      }
+     }
 }

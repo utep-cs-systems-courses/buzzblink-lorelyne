@@ -3,7 +3,7 @@
 Switch                                 | Description
 -------------------------------------- | ----------------------------------------
 1: Red Light on                        | Turn on red LED
-2: Dimming led w/ buzzer               | Dim green led, toggle red light to restart dimming
+2: Dimming led                         | Dim green led, toggle red light to restart dimming
 3: Buzz and LED pattern                | Alternate between green and red LED with buzz pattern sound
 4: Reset                               | Turn off the leds and stop buzzing.
 

@@ -100,11 +100,17 @@ void imp()
 }
 
 /*
-  Dimming led pattern functions
+  Dimming led pattern functions:
+  LCD changes intensity based on how many times it’s on per second. If the led is turned on 250 out of 250 times per second, then it can be 
+  assumed that it is at “full brightness”. But if it is only on half of the time, say 125 times out of 250, then it is only at “50% brightness”. 
+  The less amount of times it is on, the “less bright” it is. Therefore, if we lower the frequency at which the light is on, then we can make the 
+  effect that it is dimming.
 */
 static int blinkLimit = 0;    // state var representing reciprocal of duty cycle 
-void blinkUpdate()            // called every 1/250s to blink with duty cycle 1/blinkLimit
+void blinkUpdate()            // turns the light on/off based on the frequency selected
 {
+  //controls the green light based on blinkLimit. If blinkLimit is n, then the first n-1 times that it is called, it will turn off the green led, 
+  //and the n amount of times that it is called, it will turn on the green led.
   static int blinkCount = 0;  // state var representing blink state
   if (blinkCount++ >= blinkLimit) {
     blinkCount = 0;
@@ -127,15 +133,16 @@ void oncePerSecond() // repeatedly start bright and gradually lower duty cycle, 
   buzzer_set_period(curr_period);
 }
 
-void secondUpdate()  // called every 1/250 sec to call oncePerSecond once per second
+void secondUpdate()  // change the frequency at which the led is on 
 {
+  // counts 1 second and calls oncePerSecond to increase the blink count by one (to lower the intensity of the led)
   static int secondCount = 0; // state variable representing repeating time 0…1s
   if (secondCount++ >= 250) { // once each second
     secondCount = 0;
     oncePerSecond();
   }
 }
-
+// The higher n is, the more amount of times the green led will be off which gives the ilusion of dimming.
 void dimming_state_machines()
 {
     buzzer_set_period(100);

@@ -2,43 +2,18 @@
 #include "stateMachines.h"
 #include "led.h"
 #include "buzzer.h"
+#include "switches.h"
 
-static char count = 0;
+
+static char led_state = 0;
 
 /*as button is pressed, we increment to 3 starting from 0*/
-void countToThree(){
-
-  switch(count){
-  case 0:
-   buzzer_set_period(1000);
-   red_on = 0;
-   green_on = 0;
-   count = 1;
-   break;
-
-     case 1:
-   buzzer_set_period(800);
-   red_on = 1;
-   green_on = 0;
-   count = 2;
-   break;
-
-  case 2:
-   buzzer_set_period(600);
-   red_on = 0;
-   green_on = 1;
-   count = 3;
-   break;
-
-  case 3:
-   buzzer_set_period(400);
-   red_on = 1;
-   green_on = 1;
-   count = 0;
-   break;
-  }
+void toggle_red(){
+  red_on = 1;
+  green_on = 0;
   led_changed = 1;
   led_update();
+  buzzer_set_period(0);
 }
 
 static char secCount = 0;
@@ -107,46 +82,76 @@ void imperialSound(){
   case 11:
     buzzerSound = 0;
     secCount = 0;
-    break; 
+    break;
   }
   buzzer_set_period(buzzerSound);
   led_changed = 1;
   led_update();
 }
 
-/*dims lights to 75%, as we call dimLights() really fast through the wdInterrupt one state
-will be off as to achieve the desired effect of 75%*/
-void dimLights()
+static char blink_count = 0;
+static char buzzCount = 0;
+void imp()
 {
-  static char state = 0;
-  switch(state){
-  case 0:
-    red_on = 1;
-    green_on = 1;
-    state = 1;
-    break;
-  case 1:
-    red_on = 1;
-    green_on = 1;
-    state = 2;
-    break;
-  case 2:
-    red_on = 1;
-    green_on = 1;
-    state = 3;
-    break;
-  case 3:
-    red_on = 0; /*lights are both off for one state*/
-    green_on = 0;
-    state = 0;
-    break;
+   if(++buzzCount == 65){ //250 time per sec
+      imperialSound();
+      buzzCount=0;
+    }
+}
+
+/*
+  Dimming led pattern functions
+*/
+static int blinkLimit = 0;    // state var representing reciprocal of duty cycle 
+void blinkUpdate()            // called every 1/250s to blink with duty cycle 1/blinkLimit
+{
+  static int blinkCount = 0;  // state var representing blink state
+  if (blinkCount++ >= blinkLimit) {
+    blinkCount = 0;
+    greenControl(1);
+  } else
+    greenControl(0);
+}
+
+void oncePerSecond() // repeatedly start bright and gradually lower duty cycle, one step/sec
+{
+  static unsigned short period_inc = 1000;
+
+  if (++blinkLimit >= 8) {  // but don't let duty cycle go below 1/7.
+    blinkLimit = 0;
+    if (red_on)
+      curr_period = 0;      // reset buzzer period
+    change_red();
+  }
+  curr_period += period_inc;
+  buzzer_set_period(curr_period);
+}
+
+void secondUpdate()  // called every 1/250 sec to call oncePerSecond once per second
+{
+  static int secondCount = 0; // state variable representing repeating time 0…1s
+  if (secondCount++ >= 250) { // once each second
+    secondCount = 0;
+    oncePerSecond();
   }
 }
-void rest(){
-  buzzer_set_period(0);
-  count = 0;
-  red_on = 0;
-  green_on = 0;
-  led_changed = 1;
-  led_update();
+
+void dimming_state_machines()
+{
+    buzzer_set_period(100);
+    
+    blinkUpdate();
+    secondUpdate();
+
 }
+
+
+/*
+  Turn leds off and stop buzzing
+*/
+void off_leds_buzzer()
+{
+  led_off();
+  buzzer_set_period(100);
+}
+

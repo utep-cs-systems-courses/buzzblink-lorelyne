@@ -1,15 +1,16 @@
 #include <msp430.h>
-#include "led.h"
-#include "buzzer.h"
-#include "switches.h"
 #include "libTimer.h"
+#include "switches.h"
+#include "buzzer.h"
+#include "led.h"
 
-int main(void){
-  configureClocks();
-  enableWDTInterrupts();
-  led_init();
-  buzzer_init();
-  buzzer_set_period(0);
+int main(void) {
+  configureClocks();		  /* setup master oscillator, CPU & peripheral clocks */
   switch_init();
-  or_sr(0x18);
+  led_init();
+  enableWDTInterrupts();  /* enable periodic interrupt */
+  buzzer_init();
+  
+  or_sr(0x18);		/* CPU off, GIE on */
 }
+

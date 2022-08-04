@@ -11,6 +11,7 @@
 void switch_init();
 void switch_interrupt_handler();
 
+extern unsigned short n_switch_down;
 extern char switch_state_changed, bttnState, SW1down, SW2down, SW3down, SW4down, musicSwi;
 
-#endif
+#endif // included

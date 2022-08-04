@@ -1,45 +1,44 @@
 #include <msp430.h>
 #include "switches.h"
 #include "led.h"
-#include "stateMachines.h"
 #include "buzzer.h"
+#include "select_SM.h"
 
+ /* effectively boolean */
 char SW1down, SW2down, SW3down, SW4down, bttnState, musicSwi, switch_state_changed;
-char switch_update_interrupt_sense(){
-char p2val = P2IN;
-/*update switch interrupt to detect changes from current buttons*/
- P2IES |= (p2val & SWITCHES); /*if switch up, sense down*/
- P2IES &= (p2val | ~SWITCHES); /*if switch down, sense up*/
+static char switch_update_interrupt_sense()
+{
+  char p2val = P2IN;
+  /* update switch interrupt to detect changes from current buttons */
+  P2IES |= (p2val & SWITCHES);	/* if switch up, sense down */
+  P2IES &= (p2val | ~SWITCHES);	/* if switch down, sense up */
   return p2val;
 }
 
-void
-switch_init(){  //set up switch
-  P2REN |= SWITCHES;     //enables resistors for switches
-  P2IE |= SWITCHES;     ///enable interrupts from switches
-  P2OUT |= SWITCHES;   //pull-ups for switches
-  P2DIR &= ~SWITCHES;  //set switches' bits for input
+void switch_init()		/* setup switch */
+{
+  P2REN |= SWITCHES;	/* enables resistors for switches */
+  P2IE |= SWITCHES;		/* enable interrupts from switches */
+  P2OUT |= SWITCHES;	/* pull-ups for switches */
+  P2DIR &= ~SWITCHES;	/* set switches' bits for input */
   switch_update_interrupt_sense();
   led_update();
 }
 
+unsigned short n_switch_down = 0;
 void
-switch_interrupt_handler(){
+switch_interrupt_handler()
+{
   char p2val = switch_update_interrupt_sense();
-  SW1down = (p2val & SW1) ? 0 : 1;
-  SW2down = (p2val & SW2) ? 0 : 1;
-  SW3down = (p2val & SW3) ? 0 : 1;
-  SW4down = (p2val & SW4) ? 0 : 1;
-
-  if(SW1down){
-    countToThree(); //(single button) 
-    bttnState=1;
-
-  }else if(SW2down){
-    musicSwi = 1;
-  }else if(SW3down){
-    rest(); //sw4 down first, then sw3 to reset
-  }else if(SW4down){
-    musicSwi = 2; //stop music 
-  }
+    if((p2val & SW1) == 0){
+        n_switch_down = 1;
+    }else if ((p2val & SW2) == 0){
+        n_switch_down = 2;
+    }else if ((p2val & SW3) == 0){
+        n_switch_down = 3;
+    }else if ((p2val & SW4) == 0){
+        n_switch_down = 4;
+    }switch_state_changed = 1;
+    select_SM(n_switch_down);
 }
+

@@ -17,8 +17,8 @@ select_SM:
     jnc default           ;goto default if 4 < n_switch_down
     ; PC = jt[n_switch_down]
     mov &n_switch_down, r12
-    add r12, r12
-    mov jt(r12), r0
+    add r12, r12 ;get offset because each entry is 2 bytes
+    mov jt(r12), r0 ; moves value we want to PC to be read
 case1:
     call #toggle_red
     jmp end

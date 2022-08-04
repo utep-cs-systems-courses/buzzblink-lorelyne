@@ -1,6 +1,6 @@
 ## Description
 
-Bottom number: Program                 | Description
+Switch                                 | Description
 -------------------------------------- | ----------------------------------------
 1: Red Light on                        | Turn on red LED
 2: Dimming led w/ buzzer               | Dim green led, toggle red light to restart dimming
